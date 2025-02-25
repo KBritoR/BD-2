@@ -1,0 +1,29 @@
+[{
+  "_id": {
+    "$oid": "67bd1c2f7050b0e356081bd3"
+  },
+  "Aula1": {
+    "Professor": "Marcos",
+    "Alunos": [
+      "fernidando",
+      "jose devanir",
+      "megatron"
+    ]
+  },
+  "Aula2": {
+    "Professor": "Tiao canela seca",
+    "Alunos": [
+      "joao",
+      "maria",
+      "maria2.0"
+    ]
+  },
+  "Aula3": {
+    "Professor": "ze pe de manda",
+    "Alunos": [
+      "joao",
+      "devanir",
+      "tiririca"
+    ]
+  }
+}]
