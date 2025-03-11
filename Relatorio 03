@@ -1,0 +1,102 @@
+from pymongo import MongoClient
+import json
+import pprint
+import os
+from bson import json_util 
+
+
+
+class Pokedex:
+   def __init__(self, database):
+        self.database = database
+
+     
+
+   def Buscar(self, id):
+     resultado = self.database.pokemon_collection.find({ "id":id })
+      
+     return resultado
+
+   def adicionar(self,novodocu):
+    self.database.pokemon_collection.insert_one(novodocu)
+    return "POKEMON ADD"
+
+   def atualizano(self,Atualizacao,query_filter):
+    self.database.pokemon_collection.update_many(query_filter,Atualizacao,upsert = True)
+    return "Pokemon atualizado"
+   
+   def ramover(self, deletando):
+    self.database.pokemon_collection.delete_one(deletando)
+    return "Pokemon deletado"
+   
+   pass
+
+    
+    
+class Database:
+    def __init__(self):
+        self.client = MongoClient('mongodb://localhost:27017/')
+        self.db = self.client['pokedex_database']
+        self.pokemon_collection = self.db['pokemons']
+
+        self.pokemon_collection.insert_many([
+            {"id": 1, "Nome": "pikachu", "Tipo": "eletrico", "Tamanho em cm": 40},
+            {"id": 2, "Nome": "blatoise", "Tipo": "agua", "Tamanho em cm": 405},
+            {"id": 3, "Nome": "bubasauro", "Tipo": "mato", "Tamanho em cm": 305},
+            {"id": 4, "Nome": "arduino", "Tipo": "eletronico", "Tamanho em cm": 250},
+            {"id": 5, "Nome": "echel", "Tipo": "humano", "Tamanho em cm": 20}
+        ])
+
+
+
+#FUNÇÃO PARA SALVAR O JSON
+def writeAJson(data, name: str):
+    parsed_json = json.loads(json_util.dumps(data))
+    directory = "/home/jose/Área de trabalho/MATERIA AULA/BD 2/ATIVIDADE MONGO/"  
+    if not os.path.isdir(directory):
+        os.makedirs(directory)
+        
+
+    with open(f"{directory}/{name}.json", 'w') as json_file:
+        json.dump(parsed_json, json_file,
+                  indent=10,
+                  separators=(',', ': '))        
+
+
+
+
+database = Database()
+pokedex = Pokedex(database)
+resultado2 = pokedex.Buscar(1)
+
+novopokemon = {
+    "id": 10, "Nome":"jose", "Tipo":"cachaceiro", "Tamanho em CM":190 
+}
+
+Atualizando = {'$set':{"Nome": "figado", "Tipo": "orgão", "Tamanho em cm": 20}}
+
+query_filter = {"id":1}
+
+deletando = {"id":10}
+
+novopokemon2 = pokedex.adicionar(novopokemon)
+deletando2 = pokedex.ramover(deletando)
+Atualizando2 = pokedex.atualizano(Atualizando,query_filter)
+ 
+writeAJson(resultado2,"buscando")
+writeAJson(novopokemon2,"adivionando")
+writeAJson(deletando,"deletando")
+writeAJson(Atualizando2,"Atualizando")
+
+
+#pprint.pprint(pokedex.adicionar(novopokemon))
+#pprint.pprint(pokedex.atualizano(Atualizando,query_filter))
+#pprint.pprint(pokedex.ramover(deletando))
+
+
+
+#for pokemon in resultado2:
+   #if pokemon != " ":
+   # pprint.pprint(pokemon)
+   # break
+
