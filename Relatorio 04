@@ -1,0 +1,67 @@
+from collections import defaultdict
+from typing import List, Dict
+from pymongo import MongoClient
+
+class ProductAnalyzer:
+    def __init__(self, db_name: str, collection_name: str, uri: str = "mongodb://localhost:27017/"):
+        """
+        Inicializa a classe com a conexão ao MongoDB.
+        :param db_name: Nome do banco de dados.
+        :param collection_name: Nome da coleção.
+        :param uri: URI de conexão com o MongoDB.
+        """
+        self.client = MongoClient(uri)
+        self.db = self.client[db_name]
+        self.collection = self.db[collection_name]
+
+    def total_sales_per_day(self) -> Dict[str, float]:
+        """
+        Retorna o total de vendas por dia.
+        :return: Dicionário com data como chave e total de vendas como valor.
+        """
+        pipeline = [
+            {"$group": {"_id": "$date", "total_sales": {"$sum": "$total_price"}}}
+        ]
+        result = self.collection.aggregate(pipeline)
+        return {entry["_id"]: entry["total_sales"] for entry in result}
+
+    def most_sold_product(self) -> str:
+        """
+        Retorna o produto mais vendido em todas as compras.
+        :return: Nome do produto mais vendido.
+        """
+        pipeline = [
+            {"$unwind": "$items"},
+            {"$group": {"_id": "$items.product_name", "total_sold": {"$sum": "$items.quantity"}}},
+            {"$sort": {"total_sold": -1}},
+            {"$limit": 1}
+        ]
+        result = list(self.collection.aggregate(pipeline))
+        return result[0]["_id"] if result else None
+
+    def top_spender(self) -> str:
+        """
+        Encontra o cliente que mais gastou em uma única compra.
+        :return: Nome do cliente que fez a compra mais cara.
+        """
+        pipeline = [
+            {"$sort": {"total_price": -1}},
+            {"$limit": 1},
+            {"$project": {"customer_name": 1, "_id": 0}}
+        ]
+        result = list(self.collection.aggregate(pipeline))
+        return result[0]["customer_name"] if result else None
+
+    def products_sold_above_one(self) -> List[str]:
+        """
+        Lista todos os produtos que tiveram uma quantidade vendida acima de 1 unidade.
+        :return: Lista de nomes dos produtos vendidos acima de 1 unidade.
+        """
+        pipeline = [
+            {"$unwind": "$items"},
+            {"$group": {"_id": "$items.product_name", "total_sold": {"$sum": "$items.quantity"}}},
+            {"$match": {"total_sold": {"$gt": 1}}},
+            {"$project": {"_id": 1}}
+        ]
+        result = self.collection.aggregate(pipeline)
+        return [entry["_id"] for entry in result]
