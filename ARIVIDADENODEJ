@@ -1,0 +1,65 @@
+from teacher_crud import TeacherCRUD
+
+class CLI:
+    def __init__(self):
+        self.teacher_crud = TeacherCRUD()
+    
+    def run(self):
+        print("Teacher CRUD CLI")
+        while True:
+            print("\nOptions:")
+            print("1. Create Teacher")
+            print("2. Read Teacher")
+            print("3. Update Teacher")
+            print("4. Delete Teacher")
+            print("5. Exit")
+            
+            choice = input("Enter your choice (1-5): ")
+            
+            if choice == "1":
+                name = input("Enter teacher name: ")
+                ano_nasc = int(input("Enter birth year: "))
+                cpf = input("Enter CPF: ")
+                self.teacher_crud.create(name, ano_nasc, cpf)
+                print("Teacher created successfully!")
+            
+            elif choice == "2":
+                name = input("Enter teacher name to search: ")
+                result = self.teacher_crud.read(name)
+                print("Teacher found:", result)
+            
+            elif choice == "3":
+                name = input("Enter teacher name to update: ")
+                new_cpf = input("Enter new CPF: ")
+                self.teacher_crud.update(name, new_cpf)
+                print("Teacher updated successfully!")
+            
+            elif choice == "4":
+                name = input("Enter teacher name to delete: ")
+                self.teacher_crud.delete(name)
+                print("Teacher deleted successfully!")
+            
+            elif choice == "5":
+                print("Exiting...")
+                break
+            
+            else:
+                print("Invalid choice. Please try again.")
+
+if __name__ == "__main__":
+    # Create the teacher with the given characteristics
+    teacher_crud = TeacherCRUD()
+    teacher_crud.create("Chris Lima", 1956, "189.052.396-66")
+    
+    # Search for the teacher
+    print("Searching for Chris Lima:")
+    print(teacher_crud.read("Chris Lima"))
+    
+    # Update the teacher's CPF
+    teacher_crud.update("Chris Lima", "162.052.777-77")
+    print("After CPF update:")
+    print(teacher_crud.read("Chris Lima"))
+    
+    # Start the CLI
+    cli = CLI()
+    cli.run()
